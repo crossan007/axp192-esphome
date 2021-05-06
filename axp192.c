@@ -137,13 +137,13 @@ const axp192_rail_cfg_t axp192_rail_configs[] = {
     },
 };
 
-axp192_err_t axp192_get_rail_state(axp192_t *axp, axp192_rail_t rail, bool *enabled)
+axp192_err_t axp192_get_rail_state(const axp192_t *axp, axp192_rail_t rail, bool *enabled)
 {
     axp192_err_t status;
     uint8_t val;
 
     status = axp192_read_reg(axp, AXP192_DCDC13_LDO23_CONTROL, &val);
-    if (status != AXP192_ERROR_OK) {
+    if (status != AXP192_OK) {
         return status;
     }
 
@@ -170,17 +170,17 @@ axp192_err_t axp192_get_rail_state(axp192_t *axp, axp192_rail_t rail, bool *enab
             return AXP192_ERROR_EINVAL;
     }
 
-    return AXP192_ERROR_OK;
+    return AXP192_OK;
 }
 
-axp192_err_t axp192_set_rail_state(axp192_t *axp, axp192_rail_t rail, bool enabled)
+axp192_err_t axp192_set_rail_state(const axp192_t *axp, axp192_rail_t rail, bool enabled)
 {
     axp192_err_t status;
     uint8_t val;
     uint8_t mask;
 
     status = axp192_read_reg(axp, AXP192_DCDC13_LDO23_CONTROL, &val);
-    if (status != AXP192_ERROR_OK) {
+    if (status != AXP192_OK) {
         return status;
     }
 
@@ -214,17 +214,17 @@ axp192_err_t axp192_set_rail_state(axp192_t *axp, axp192_rail_t rail, bool enabl
     }
 
     status = axp192_write_reg(axp, AXP192_DCDC13_LDO23_CONTROL, val);
-    if (status != AXP192_ERROR_OK) {
+    if (status != AXP192_OK) {
         return status;
     }
 
-    return AXP192_ERROR_OK;
+    return AXP192_OK;
 }
 
 axp192_err_t axp192_bits(const axp192_t *axp, uint8_t reg, uint8_t bits_off, uint8_t bits_on) {
     uint8_t val;
     axp192_err_t ret = axp192_read_reg(axp, reg, &val);
-    if (ret != AXP192_ERROR_OK) {
+    if (ret != AXP192_OK) {
       return ret;
     }
     val &= ~bits_off;
@@ -232,7 +232,7 @@ axp192_err_t axp192_bits(const axp192_t *axp, uint8_t reg, uint8_t bits_off, uin
     return axp192_write_reg(axp, reg, val);
 }
 
-axp192_err_t axp192_get_rail_millivolts(axp192_t *axp, axp192_rail_t rail, uint16_t *millivolts)
+axp192_err_t axp192_get_rail_millivolts(const axp192_t *axp, axp192_rail_t rail, uint16_t *millivolts)
 {
     axp192_err_t status;
     uint8_t val;
@@ -247,7 +247,7 @@ axp192_err_t axp192_get_rail_millivolts(axp192_t *axp, axp192_rail_t rail, uint1
     }
 
     status = axp192_read_reg(axp, cfg->voltage_reg, &val);
-    if (status != AXP192_ERROR_OK) {
+    if (status != AXP192_OK) {
         return status;
     }
 
@@ -255,10 +255,10 @@ axp192_err_t axp192_get_rail_millivolts(axp192_t *axp, axp192_rail_t rail, uint1
 
     *millivolts = cfg->min_millivolts + cfg->step_millivolts * val;
 
-    return AXP192_ERROR_OK;
+    return AXP192_OK;
 }
 
-axp192_err_t axp192_set_rail_millivolts(axp192_t *axp, axp192_rail_t rail, uint16_t millivolts)
+axp192_err_t axp192_set_rail_millivolts(const axp192_t *axp, axp192_rail_t rail, uint16_t millivolts)
 {
 
     axp192_err_t status;
@@ -278,7 +278,7 @@ axp192_err_t axp192_set_rail_millivolts(axp192_t *axp, axp192_rail_t rail, uint1
     }
 
     status = axp192_read_reg(axp, cfg->voltage_reg, &val);
-    if (status != AXP192_ERROR_OK) {
+    if (status != AXP192_OK) {
         return status;
     }
 
@@ -286,19 +286,19 @@ axp192_err_t axp192_set_rail_millivolts(axp192_t *axp, axp192_rail_t rail, uint1
     val = (val & ~(cfg->voltage_mask)) | (steps << cfg->voltage_lsb);
 
     status = axp192_write_reg(axp, cfg->voltage_reg, val);
-    if (status != AXP192_ERROR_OK) {
+    if (status != AXP192_OK) {
         return status;
     }
 
-    return AXP192_ERROR_OK;
+    return AXP192_OK;
 }
 
-axp192_err_t axp192_read_reg(axp192_t *axp, uint8_t reg, uint8_t *val)
+axp192_err_t axp192_read_reg(const axp192_t *axp, uint8_t reg, uint8_t *val)
 {
     return axp->read(axp->handle, AXP192_ADDRESS, reg, val, 1);
 }
 
-axp192_err_t axp192_write_reg(axp192_t *axp, uint8_t reg, uint8_t val)
+axp192_err_t axp192_write_reg(const axp192_t *axp, uint8_t reg, uint8_t val)
 {
     return axp->write(axp->handle, AXP192_ADDRESS, reg, &val, 1);
 }
@@ -318,13 +318,13 @@ axp192_err_t axp192_read_irq_mask(const axp192_t *axp, uint8_t mask[5])
     for (i = 0; i < 5; i++) {
         if (mask[i] != 0) {
             ret = axp192_read_reg(axp, regs[i], &mask[i]);
-            if (ret != AXP192_ERROR_OK) {
+            if (ret != AXP192_OK) {
                 return ret;
             }
         }
     }
 
-    return AXP192_ERROR_OK;
+    return AXP192_OK;
 }
 
 axp192_err_t axp192_write_irq_mask(const axp192_t *axp, uint8_t mask[5])
@@ -341,12 +341,12 @@ axp192_err_t axp192_write_irq_mask(const axp192_t *axp, uint8_t mask[5])
     int i;
     for (i = 0; i < 5; i++) {
         ret = axp192_write_reg(axp, regs[i], mask[i]);
-        if (ret != AXP192_ERROR_OK) {
+        if (ret != AXP192_OK) {
             return ret;
         }
     }
 
-    return AXP192_ERROR_OK;
+    return AXP192_OK;
 }
 
 axp192_err_t axp192_read_irq_status(const axp192_t *axp, const uint8_t mask[5], uint8_t status[5], bool clear)
@@ -369,7 +369,7 @@ axp192_err_t axp192_read_irq_status(const axp192_t *axp, const uint8_t mask[5], 
         }
 
         ret = axp192_read_reg(axp, regs[i], &status[i]);
-        if (ret != AXP192_ERROR_OK) {
+        if (ret != AXP192_OK) {
             return ret;
         }
 
@@ -377,13 +377,13 @@ axp192_err_t axp192_read_irq_status(const axp192_t *axp, const uint8_t mask[5], 
 
         if (clear && status[i]) {
             ret = axp192_write_reg(axp, regs[i], status[i]);
-            if (ret != AXP192_ERROR_OK) {
+            if (ret != AXP192_OK) {
                 return ret;
             }
         }
     }
 
-    return AXP192_ERROR_OK;
+    return AXP192_OK;
 }
 
 axp192_err_t axp192_read(const axp192_t *axp, uint8_t reg, float *buffer)
